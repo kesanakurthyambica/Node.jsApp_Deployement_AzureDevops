@@ -1,1 +1,263 @@
+Deploy a Node.js App to a Deployment Slot in Azure DevOps
+Introduction
+You have been given the code for a Node.js application and must deploy it to an Azure Web App with two slots. Use Azure DevOps to integrate the code and deploy it to the dev slot in the Azure Web App provided with this lab. Then, using Azure DevOps and the pipeline, swap the slot in the Azure Web App from dev to production.
 
+Use the credentials provided with this lab to log in to the Azure portal and the Linux VM. Create a new DevOps organization, followed by a new Azure DevOps project. Within your new project, go to Azure Repos and import an existing GitHub repository. Create a service connection within Azure DevOps. Install a self-hosted agent onto the provided Linux VM using a personal access token. Once the agent has been installed, create a new Azure DevOps pipeline pointing at the Azure Repo. Test the pipeline by add permissions to the build agent and then running the pipeline and ensuring the application code was deployed correctly.
+
+Solution
+First, log in to the Azure portal using the credentials provided on the lab instructions page.
+
+Under linVM, click Launch Instant Terminal. Next, at the prompt, log in to the Linux VM using the credentials provided:
+
+ssh cloud_user@<Public IP>
+Enter y and then the provided Password when prompted.
+
+Create a New Azure DevOps Organization and Project
+In the Azure portal, use the search bar and search for Azure DevOps. Select Azure DevOps organizations.
+
+Scroll down and click on My Azure DevOps Organizations.
+
+Select your country/region from the From dropdown.
+
+Click on Continue.
+
+Click Create new organization, then Continue, enter the required characters (the captcha), and click Continue.
+
+Set the following values to create a project:
+
+Project name: AwesomeProject
+Visibility: Private (This should be selected by default.)
+Click + Create project.
+
+Import an Existing Repo into Azure Repos
+In the left-hand navigation menu, click on Repos.
+
+Note: If you see a message that the repository was not found, select Switch to the default AwesomeProject repository.
+
+Under the Import a repository section, click on Import.
+
+In the Clone URL box, paste in the following URL: https://github.com/pluralsight-cloud/AZ-400-Designing-and-Implementing-Microsoft-DevOps-Solutions.git
+
+Click on Import.
+
+In the top center of the page, click on main.
+
+Select the node-express branch.
+
+In the left-hand navigation menu, click on Branches.
+
+Hover over the node-express branch row, and on the far-right click on the three-vertical-dots button.
+
+Click on Set as default branch.
+
+In the left-hand navigation menu, at the bottom, click on Project settings.
+
+Click on Service connections.
+
+Create a Service Connection
+Click Create service connection.
+
+Select Azure Resource Manager.
+
+Click Next.
+
+Note: If you see radial selections for the authentication method like Workload Identity federation (automatic) and Workload Identity federation (manual), follow the steps below to configure your service principle:
+
+Select Service principle (manual).
+
+Go to your main Azure portal window (the first tab you had open). Click Home.
+
+Click the Cloud Shell icon (>_) in the upper right.
+
+Select PowerShell.
+
+Select your subscription from the Subscription dropdown.
+
+Click on Apply.
+
+In PowerShell, run the following command:
+
+Get-AzSubscription
+
+Copy the value under Id.
+
+Back in the Service Connection window, paste this value for the Subscription ID.
+
+Back in the PowerShell window, copy the value for Name.
+
+Back in the Service Connection window, paste this value for the Subscription name.
+
+Back in the PowerShell window, copy the value for the TenantId.
+
+Back in the Service Connection window, paste this value for the Tenant ID.
+
+From your lab credentials, copy the Application Client ID, and paste it in the Service Principal Id field.
+
+From your lab credentials, copy the value for the Secret, and paste it in the Service principal key field.
+
+Proceed to Step 20 below.
+
+Click on the Identity type dropdown and select App registration or managed identity (manual).
+
+Click on the Credential dropdown and select Secret.
+
+Go to your main Azure portal window (the first tab you had open). Click Home.
+
+Click the Cloud Shell icon (>_) in the upper right.
+
+Select PowerShell.
+
+Select your subscription from the Subscription dropdown.
+
+Click on Apply.
+
+In PowerShell, run the following command:
+
+Get-AzSubscription
+Copy the value under Id.
+
+Back in the Service Connection window, paste this value for the Subscription ID.
+
+Back in the PowerShell window, copy the value for Name.
+
+Back in the Service Connection window, paste this value for the Subscription name.
+
+Back in the PowerShell window, copy the value for the TenantId.
+
+Back in the Service Connection window, paste this value for the Directory (tenant) ID.
+
+From your lab credentials, copy the Application Client ID, and paste it in the Application (client) ID field.
+
+From your lab credentials, copy the value for the Secret, and paste it in the Client secret field.
+
+Click Verify.
+
+Scroll down to Service connection name field, and enter ServiceConnection.
+
+Click Grant access permission to all pipelines checkbox.
+
+Click Verify and save.
+
+On the left, under the Pipelines header, click on Agent pools.
+
+Install a Self-hosted Agent on the Provided VM
+Click on Default.
+
+In the top right-hand corner, click on New agent.
+
+Select the Linux tab.
+
+To the right of Download, click on the Copy icon to copy the AGENT_URL to your clipboard.
+
+In the Instant Terminal Linux VM window, paste in the AGENT_URL to grab the .tar.gz file:
+
+wget <AGENT_URL>
+Extract the agent compressed file:
+
+tar zxvf vsts-agent-linux-<VERSION>.tar.gz
+Run the configuration script:
+
+./config.sh
+Enter y to accept the license agreement.
+
+When prompted for your server URL, go back to the Azure DevOps page, and grab the first part of the URL from your browser, up to and not including the project name. It will look something like https://dev.azure.com/clouduser..., followed by some letters and numbers. Paste this into the linVM Instant Terminal.
+
+See the solution video for an example of doing this.
+Press Enter to accept the default authentication type of PAT.
+
+When prompted for your personal access token (PAT), go back to Azure DevOps, close the Get the agent panel, and in the upper right-hand corner, click the User settings icon. Then select Personal access tokens.
+
+Click on + New Token and set the following values:
+
+Name: accesstoken
+Scopes: Full access
+Click on Create.
+
+Copy the accesstoken token.
+
+In the linVM Instant Terminal, paste in your personal access token.
+
+Press Enter to accept the default agent pool.
+
+Press Enter to accept the default agent name.
+
+Press Enter to accept the default work folder.
+
+Run the agent interactively so that it is always listening for any jobs:
+
+./run.sh
+Return to Azure DevOps window, and close the Success! panel.
+
+Click on Azure DevOps in the upper-left corner, then click your project, AwesomeProject.
+
+In the left-hand navigation menu, click on Pipelines.
+
+Create an Azure DevOps Pipeline
+Click Create Pipeline.
+
+Ensure you're at the Connect tab, then click Azure Repos Git.
+
+Click AwesomeProject.
+
+Go to your main Azure portal window (the first tab you had open). Click your resource group.
+
+Copy the name of the resource group.
+
+Back in the Pipelines window, highlight the variable value ResourceGroup and paste the copied resource group name.
+
+Back in the Azure window, close out of the cloud shell window.
+
+Copy the name of the App Service.
+
+Back in the Pipelines window, highlight the variable value AppServiceName and paste the copied app service name.
+
+(If you needed to add one of these tasks or stages, you could click on Show assistant. For example, the Azure App Service deploy task can be found by searching for Azure and selecting Azure App Service deploy task. You would then collapse the Show assistant tab.)
+
+On the right-hand side of the screen, from the dropdown next to the Save and run button, choose Save.
+
+Click on Save.
+
+In the left-hand navigation menu, at the bottom, click on Project settings.
+
+On the left, under the Pipelines header, click on Agent pools.
+
+Click on Default.
+
+Click on Security.
+
+Click on the + sign, in pipeline permissions.
+
+Select AwesomeProject pipeline.
+
+In the left-hand navigation menu, click on Pipelines.
+
+Click AwesomeProject pipeline.
+
+Click on Run pipeline.
+
+Click Run.
+
+Click on Build stage. It will take a few minutes for the job to be completed.
+
+On the build stage, while the Build job is selected, click on 1 artifact.
+
+Expand drop to see the zip file.
+
+Click on the your browser back arrow.
+
+Click on Deploy under the Deploy stage.
+
+Click on View in the warning ribbon.
+
+Click Permit.
+
+Click Permit.
+
+Note: It will take several minutes for the job to be completed.
+
+Go to your main Azure portal window (the first tab you had open). Click on your App Service.
+
+Click Browse.
+
+Conclusion
+Congratulations–you've completed this hands-on lab!
