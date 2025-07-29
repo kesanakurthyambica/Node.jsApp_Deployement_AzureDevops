@@ -26,4 +26,17 @@ Build an organisation in azure devops and create a project.
 
 Import the repo under azure devops project.
 
+Create a service connection with azure to connect with VM and to deploy the app in VM
+
+Create an agent in connect the agent with VM
+
+Create the Pipeline and build the pipeline
+
+Finally run the pipeline and navigate to the web app through URL.
+
+Successfully!!!
+Deployed the NOde.js application in Azure Devops.
+
+
+
 
